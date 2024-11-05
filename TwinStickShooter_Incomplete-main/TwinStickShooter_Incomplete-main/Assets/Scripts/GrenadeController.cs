@@ -5,27 +5,17 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class GrenadeController : MonoBehaviour
 {
-    Rigidbody rb;
     private bool hasExploded;
     public LayerMask mask;
-    public float launchForce;
     public float timer;
     public float radius;
     public float explosionForce;
     public GameObject particles;
     public GameObject grenade;
-    void Start()
-    {
-        rb = grenade.GetComponent<Rigidbody>();
-
-    }
 
     private void Update()
     {
-        Vector3 launchDirection = transform.forward * launchForce;
-        rb.AddForce(launchDirection, ForceMode.Impulse);
-        rb.angularVelocity = new Vector3(0,0,0) * launchForce;
-
+   
         if (!hasExploded)
         {
             timer -= Time.deltaTime;
