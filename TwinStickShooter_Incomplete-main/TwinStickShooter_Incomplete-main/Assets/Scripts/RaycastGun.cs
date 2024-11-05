@@ -5,10 +5,11 @@ using UnityEngine;
 public class RaycastGun : MonoBehaviour
 {
     public LineRenderer line;
-    public float lineFadeSpeed;
+    public float lineFadeSpeed = 1f;
     public LayerMask mask;
-    public float knockbackForce = 10;
-    void Update()
+    public float knockbackForce = 10f;
+
+    private void Update()
     {
         line.startColor = new Color(line.startColor.r, line.startColor.g, line.startColor.b, line.startColor.a - Time.deltaTime * lineFadeSpeed);
         line.endColor = new Color(line.endColor.r, line.endColor.g, line.endColor.b, line.endColor.a - Time.deltaTime * lineFadeSpeed);
@@ -18,8 +19,33 @@ public class RaycastGun : MonoBehaviour
             line.startColor = new Color(line.startColor.r, line.startColor.g, line.startColor.b, 1);
             line.endColor = new Color(line.endColor.r, line.endColor.g, line.endColor.b, 1);
 
-            line.SetPosition(0, transform.position);
-            line.SetPosition(1, transform.position + transform.forward * 1000);
+            RaycastHit hit;
+            Vector3 rayOrigin = transform.position;
+            Vector3 rayDirection = transform.forward;
+
+            line.SetPosition(0, rayOrigin);
+            line.SetPosition(1, rayOrigin + rayDirection * 1000);
+
+            if (Physics.Raycast(rayOrigin, rayDirection, out hit, mask))
+            {
+                line.SetPosition(1, hit.point);
+                EnemyController enemy = hit.collider.GetComponent<EnemyController>();
+                if (hit.collider.CompareTag("Enemy"))
+                {
+                    if (enemy != null)
+                    {
+                        enemy.Kill();
+                    }
+                }
+
+                if (hit.rigidbody != null)
+                {
+                    Vector3 knockbackDirection = hit.transform.position - transform.position;
+                    knockbackDirection.Normalize();
+
+                    hit.rigidbody.AddForce(knockbackDirection * knockbackForce, ForceMode.Impulse);
+                }
+            }
         }
     }
 }
